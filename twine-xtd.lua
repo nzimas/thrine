@@ -3,11 +3,12 @@
 --
 -- by: @cfd90
 --
--- ENC1 volume
--- KEY2 randomize 1
+-- E1 volume
+-- K1 long-press random 3
+-- K2 randomize 1
 -- KEY3 randomize 2
 -- ENC2 seek 1
--- ENC3 seek 2
+-- ENC3 seek 2 / seek 3 rev
 
 engine.name = "Glut"
 
@@ -56,7 +57,7 @@ local function setup_params()
     params:add_taper(i .. "fade", i .. " att / dec", 1, 9000, 1000, 3, "ms")
     params:set_action(i .. "fade", function(value) engine.envscale(i, value / 1000) end)
     
-    params:add_control(i .. "seek", i .. " seek", controlspec.new(0, 100, "lin", 0.1, 0, "%", 0.1/100))
+    params:add_control(i .. "seek", i .. " seek", controlspec.new(0, 100, "lin", 0.1, i == 3 and 100 or 0, "%", 0.1/100))
     params:set_action(i .. "seek", function(value) engine.seek(i, value / 100) end)
     
     params:add_option(i .. "random_seek", i .. " randomize seek", {"off", "on"}, 1)
@@ -214,7 +215,7 @@ local function setup_engine()
   engine.seek(2, 0)
   engine.gate(2, 1)
   
-  engine.seek(3, 0)
+  engine.seek(3, 1)
   engine.gate(3, 1)
 
   randomize(1)
@@ -237,6 +238,7 @@ function enc(n, d)
     params:delta("1seek", d)
   elseif n == 3 then
     params:delta("2seek", d)
+    params:delta("3seek", -d)
   elseif n == 4 then
     params:delta("3seek", d)
   end
