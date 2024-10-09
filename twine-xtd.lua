@@ -85,16 +85,46 @@ local function setup_params()
     end)
 
     params:add_option(i .. "automate_density", i .. " automate density", {"off", "on"}, 1)
+    params:add_option(i .. "automate_size", i .. " automate size", {"off", "on"}, 1)
     params:set_action(i .. "automate_density", function(value)
       if value == 2 then
         if lfo_metros[i] == nil then
           lfo_metros[i] = metro.init()
           lfo_metros[i].event = function()
-            local min_density = params:get("min_density")
-            local max_density = params:get("max_density")
-            local lfo_value = (math.sin(util.time() * params:get(i .. "density_lfo") * 2 * math.pi) + 1) / 2
-            local density = min_density + (max_density - min_density) * lfo_value
-            params:set(i .. "density", density)
+            if params:get(i .. "automate_density") == 2 then
+              local min_density = params:get("min_density")
+              local max_density = params:get("max_density")
+              local lfo_value = (math.sin(util.time() * params:get(i .. "density_lfo") * 2 * math.pi) + 1) / 2
+              local density = min_density + (max_density - min_density) * lfo_value
+              params:set(i .. "density", density)
+            end
+            if params:get(i .. "automate_size") == 2 then
+              local min_size = params:get("min_size")
+              local max_size = params:get("max_size")
+              local lfo_value = (math.sin(util.time() * params:get(i .. "size_lfo") * 2 * math.pi) + 1) / 2
+              local size = min_size + (max_size - min_size) * lfo_value
+              params:set(i .. "size", size)
+            end
+          end
+        end
+        lfo_metros[i]:start(1 / 30) -- Update at 30 fps
+      else
+        if lfo_metros[i] ~= nil then
+          lfo_metros[i]:stop()
+        end
+      end
+    end)
+
+    params:set_action(i .. "automate_size", function(value)
+      if value == 2 then
+        if lfo_metros[i] == nil then
+          lfo_metros[i] = metro.init()
+          lfo_metros[i].event = function()
+            local min_size = params:get("min_size")
+            local max_size = params:get("max_size")
+            local lfo_value = (math.sin(util.time() * params:get(i .. "size_lfo") * 2 * math.pi) + 1) / 2
+            local size = min_size + (max_size - min_size) * lfo_value
+            params:set(i .. "size", size)
           end
         end
         lfo_metros[i]:start(1 / 30) -- Update at 30 fps
@@ -106,6 +136,7 @@ local function setup_params()
     end)
 
     params:add_control(i .. "density_lfo", i .. " density lfo", controlspec.new(0.01, 10, "lin", 0.01, 0.5, "hz", 0.01/10))
+    params:add_control(i .. "size_lfo", i .. " size lfo", controlspec.new(0.01, 10, "lin", 0.01, 0.5, "hz", 0.01/10))
     params:set_action(i .. "density_lfo", function(value)
       if params:get(i .. "automate_density") == 2 and lfo_metros[i] ~= nil then
         lfo_metros[i]:start()
