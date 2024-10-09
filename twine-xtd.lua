@@ -1,7 +1,5 @@
--- twine
--- "to form by twisting,
--- intertwining,
--- or interlacing..."
+-- Norns Script with Randomized Seek Feature
+-- "to form by twisting, intertwining, or interlacing..."
 --
 -- by: @cfd90
 --
@@ -14,8 +12,8 @@
 engine.name = "Glut"
 
 local ui_metro
-local seek_metro
-local seek_direction = {1, 1}
+
+local random_seek_metros = {nil, nil}
 
 local function setup_ui_metro()
   ui_metro = metro.init()
@@ -25,32 +23,6 @@ local function setup_ui_metro()
   end
   
   ui_metro:start()
-end
-
-local function setup_seek_metro()
-  seek_metro = metro.init()
-  seek_metro.time = 0.1
-  seek_metro.event = function()
-    for i=1,2 do
-      if params:get("automate_seek") == 2 then
-        local current_seek = params:get(i .. "seek")
-        local speed = (100 / (params:get("seek_speed") / seek_metro.time)) * seek_direction[i]
-        local new_seek = current_seek + speed
-        
-        if new_seek > 100 then
-          new_seek = 100
-          seek_direction[i] = -1
-        elseif new_seek < 0 then
-          new_seek = 0
-          seek_direction[i] = 1
-        end
-        
-        params:set(i .. "seek", new_seek)
-      end
-    end
-  end
-  
-  seek_metro:start()
 end
 
 local function setup_params()
@@ -87,6 +59,31 @@ local function setup_params()
     params:add_control(i .. "seek", i .. " seek", controlspec.new(0, 100, "lin", 0.1, 0, "%", 0.1/100))
     params:set_action(i .. "seek", function(value) engine.seek(i, value / 100) end)
     
+    params:add_option(i .. "random_seek", i .. " randomize seek", {"off", "on"}, 1)
+    params:set_action(i .. "random_seek", function(value)
+      if value == 2 then
+        if random_seek_metros[i] == nil then
+          random_seek_metros[i] = metro.init()
+          random_seek_metros[i].event = function()
+            params:set(i .. "seek", math.random() * 100)
+          end
+        end
+        random_seek_metros[i]:start(params:get(i .. "random_seek_freq") / 1000)
+      else
+        if random_seek_metros[i] ~= nil then
+          random_seek_metros[i]:stop()
+        end
+      end
+    end)
+    
+    params:add_control(i .. "random_seek_freq", i .. " random seek freq", controlspec.new(100, 20000, "lin", 100, 1000, "ms", 100/20000))
+    params:set_action(i .. "random_seek_freq", function(value)
+      if params:get(i .. "random_seek") == 2 and random_seek_metros[i] ~= nil then
+        random_seek_metros[i].time = value / 1000
+        random_seek_metros[i]:start()
+      end
+    end)
+    
     params:hide(i .. "speed")
     params:hide(i .. "jitter")
     params:hide(i .. "size")
@@ -95,10 +92,6 @@ local function setup_params()
     params:hide(i .. "spread")
     params:hide(i .. "fade")
   end
-
-  params:add_separator("automation")
-  params:add_option("automate_seek", "Automate Seek", {"Off", "On"}, 1)
-  params:add_control("seek_speed", "Seek Speed", controlspec.new(1, 60, "lin", 1, 10, "s"))
 
   params:add_separator("reverb")
   
@@ -168,7 +161,6 @@ end
 
 function init()
   setup_ui_metro()
-  setup_seek_metro()
   setup_params()
   setup_engine()
 end
