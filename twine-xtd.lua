@@ -1,20 +1,18 @@
--- Norns Script with Randomized Seek Feature
+-- Norns Script with Randomized Seek Feature and Density LFO
 -- "to form by twisting, intertwining, or interlacing..."
 --
 -- by: @cfd90
--- extended by @nzimas
 --
 -- ENC1 volume
 -- KEY2 randomize 1
 -- KEY3 randomize 2
 -- ENC2 seek 1
 -- ENC3 seek 2
--- Randomize seek in EDIT menu
 
 engine.name = "Glut"
 
 local ui_metro
-
+local lfo_metros = {nil, nil}
 local random_seek_metros = {nil, nil}
 
 local function setup_ui_metro()
@@ -83,6 +81,34 @@ local function setup_params()
       if params:get(i .. "random_seek") == 2 and random_seek_metros[i] ~= nil then
         random_seek_metros[i].time = value / 1000
         random_seek_metros[i]:start()
+      end
+    end)
+
+    params:add_option(i .. "automate_density", i .. " automate density", {"off", "on"}, 1)
+    params:set_action(i .. "automate_density", function(value)
+      if value == 2 then
+        if lfo_metros[i] == nil then
+          lfo_metros[i] = metro.init()
+          lfo_metros[i].event = function()
+            local min_density = params:get("min_density")
+            local max_density = params:get("max_density")
+            local lfo_value = (math.sin(util.time() * params:get(i .. "density_lfo") * 2 * math.pi) + 1) / 2
+            local density = min_density + (max_density - min_density) * lfo_value
+            params:set(i .. "density", density)
+          end
+        end
+        lfo_metros[i]:start(1 / 30) -- Update at 30 fps
+      else
+        if lfo_metros[i] ~= nil then
+          lfo_metros[i]:stop()
+        end
+      end
+    end)
+
+    params:add_control(i .. "density_lfo", i .. " density lfo", controlspec.new(0.01, 10, "lin", 0.01, 0.5, "hz", 0.01/10))
+    params:set_action(i .. "density_lfo", function(value)
+      if params:get(i .. "automate_density") == 2 and lfo_metros[i] ~= nil then
+        lfo_metros[i]:start()
       end
     end)
     
