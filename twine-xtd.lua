@@ -12,8 +12,8 @@
 engine.name = "Glut"
 
 local ui_metro
-local lfo_metros = {nil, nil}
-local random_seek_metros = {nil, nil}
+local lfo_metros = {nil, nil, nil}
+local random_seek_metros = {nil, nil, nil}
 
 local function setup_ui_metro()
   ui_metro = metro.init()
@@ -28,7 +28,7 @@ end
 local function setup_params()
   params:add_separator("samples")
   
-  for i=1,2 do
+  for i=1,3 do
     params:add_file(i .. "sample", i .. " sample")
     params:set_action(i .. "sample", function(file) engine.read(i, file) end)
     
@@ -213,9 +213,13 @@ local function setup_engine()
   
   engine.seek(2, 0)
   engine.gate(2, 1)
+  
+  engine.seek(3, 0)
+  engine.gate(3, 1)
 
   randomize(1)
   randomize(2)
+  randomize(3)
 end
 
 function init()
@@ -228,22 +232,46 @@ function enc(n, d)
   if n == 1 then
     params:delta("1volume", d)
     params:delta("2volume", d)
+    params:delta("3volume", d)
   elseif n == 2 then
     params:delta("1seek", d)
   elseif n == 3 then
     params:delta("2seek", d)
+  elseif n == 4 then
+    params:delta("3seek", d)
   end
 end
 
+local key1_hold = false
+
 function key(n, z)
   if z == 0 then
+    if n == 1 and key1_hold then
+      key1_hold = false
+    end
     return
+  end
+
+  if n == 1 then
+    key1_hold = true
+    clock.run(function()
+      clock.sleep(1) -- long press detection
+      if key1_hold then
+        randomize(3)
+      end
+    end)
+  elseif n == 2 then
+    randomize(1)
+  elseif n == 3 then
+    randomize(2)
   end
   
   if n == 2 then
     randomize(1)
   elseif n == 3 then
     randomize(2)
+  elseif n == 4 then
+    randomize(3)
   end
 end
 
@@ -258,6 +286,10 @@ function redraw()
   screen.text(" / ")
   screen.level(5)
   screen.text(params:string("2jitter"))
+  screen.level(1)
+  screen.text(" / ")
+  screen.level(5)
+  screen.text(params:string("3jitter"))
   screen.move(0, 20)
   screen.level(15)
   screen.text("size: ")
@@ -267,6 +299,10 @@ function redraw()
   screen.text(" / ")
   screen.level(5)
   screen.text(params:string("2size"))
+  screen.level(1)
+  screen.text(" / ")
+  screen.level(5)
+  screen.text(params:string("3size"))
   screen.move(0, 30)
   screen.level(15)
   screen.text("density: ")
@@ -276,6 +312,10 @@ function redraw()
   screen.text(" / ")
   screen.level(5)
   screen.text(params:string("2density"))
+  screen.level(1)
+  screen.text(" / ")
+  screen.level(5)
+  screen.text(params:string("3density"))
   screen.move(0, 40)
   screen.level(15)
   screen.text("spread: ")
@@ -285,6 +325,10 @@ function redraw()
   screen.text(" / ")
   screen.level(5)
   screen.text(params:string("2spread"))
+  screen.level(1)
+  screen.text(" / ")
+  screen.level(5)
+  screen.text(params:string("3spread"))
   screen.move(0, 50)
   screen.level(15)
   screen.text("pitch: ")
@@ -294,6 +338,10 @@ function redraw()
   screen.text(" / ")
   screen.level(5)
   screen.text(params:string("2pitch"))
+  screen.level(1)
+  screen.text(" / ")
+  screen.level(5)
+  screen.text(params:string("3pitch"))
   screen.move(0, 60)
   screen.level(15)
   screen.text("seek: ")
@@ -303,5 +351,9 @@ function redraw()
   screen.text(" / ")
   screen.level(5)
   screen.text(params:string("2seek"))
+  screen.level(1)
+  screen.text(" / ")
+  screen.level(5)
+  screen.text(params:string("3seek"))
   screen.update()
 end
