@@ -2,12 +2,14 @@
 -- "to form by twisting, intertwining, or interlacing..."
 --
 -- by: @cfd90
+-- extended by @nzimas
 --
 -- ENC1 volume
 -- KEY2 randomize 1
 -- KEY3 randomize 2
 -- ENC2 seek 1
 -- ENC3 seek 2
+-- Randomize seek in EDIT menu
 
 engine.name = "Glut"
 
