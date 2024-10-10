@@ -1,7 +1,6 @@
--- Norns Script with Randomized Seek Feature and Density LFO
--- "to form by twisting, intertwining, or interlacing..."
---
--- by: @cfd90
+-- THRINE: Enhanced 3-track random granulator
+-- originally deved by @cfd90
+-- extended by @nzimas
 --
 -- E1 volume
 -- K1 long-press random 3
