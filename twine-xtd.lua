@@ -5,9 +5,9 @@
 -- E1 volume
 -- K1 long-press random 3
 -- K2 randomize 1
--- KEY3 randomize 2
--- ENC2 seek 1
--- ENC3 seek 2 / seek 3 rev
+-- K3 randomize 2
+-- E2 seek 1
+-- E3 seek 2 / seek 3 rev
 
 engine.name = "Glut"
 
