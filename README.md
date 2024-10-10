@@ -1,5 +1,5 @@
 # THRINE
-Extended version of the Twine granular script for Norns by @cfd90, with 3 sample slots.
+Extended version of the Twine granular script for Norns by @cfd90, with 3 sample slots and extended randomisation.
 
 ~~Can't tell yet if it the 3rd slot is a parasitic outgrowth of the twins or a twon in its own right, in which case the script should be renamed Thrine :)~~
 
